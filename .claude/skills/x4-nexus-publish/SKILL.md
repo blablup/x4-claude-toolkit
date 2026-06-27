@@ -37,17 +37,21 @@ Then **show the user the numbered results** and let them reorder/drop before upl
 for photos/screens; keep `png` for crisp UI graphics. See `tools/nexus-banner/README.md`.)
 
 ## 4. Build the distributable archive
-Package **only the runtime files** (the mod folder named by `id`, containing `content.xml` and the
-game-path dirs like `md/ aiscripts/ ui/ t/ libraries/ assets/`) — exclude `docs/`, `dist/`,
-`.git/`, `.claude/`, `.banner/`. Name it `<id>-<version>.zip` so it extracts to
-`extensions/<id>/content.xml`:
+Package the mod folder (named by `id`) with **all runtime files**, excluding dev cruft only —
+`docs/`, `dist/`, `.git/`, `.claude/`, `.banner/`, `*.md`, `LICENSE`. Name it `<id>-<version>.zip`
+so it extracts to `extensions/<id>/content.xml`. Use an **exclude list, not an allow-list** — an
+allow-list of dirs silently drops root runtime files like **`ui.xml`** (the 9.0 native UI-Lua
+loader) and stray runtime files:
 ```
-# clean snapshot of tracked runtime files (run in the mod repo):
-git archive --format=zip --prefix="<id>/" -o "dist/<id>-<version>.zip" HEAD \
-  content.xml md aiscripts ui t libraries assets   # (only the dirs that exist)
+# clean tracked snapshot, exclude non-runtime (run in the mod repo):
+git archive --format=zip --prefix="<id>/" -o "dist/<id>-<version>.zip" HEAD -- \
+  ':(exclude)docs' ':(exclude)dist' ':(exclude).claude' ':(exclude).banner' \
+  ':(exclude)*.md' ':(exclude)LICENSE' ':(exclude).gitignore' ':(exclude).gitattributes'
 ```
-(Or pack a CAT/DAT release with `bin/xrcat -in <mod> -out dist/<id>/ext_01` if the user prefers a
-packed mod.) Confirm the archive contents before finishing.
+Then **verify the archive**: confirm `content.xml`, `ui.xml` (if the mod has one) and any
+`assets/` icons are present and `docs/`/`README`/`LICENSE` are not. (Or pack a CAT/DAT release with
+`bin/xrcat -in <mod> -out dist/<id>/ext_01`.) `git archive` ships the committed tree — if the
+working tree has uncommitted changes, commit first or the release won't match.
 
 ## 5. Requirements
 List each dependency as a requirement with its resolved Nexus link (from `x4-nexus-release` /
