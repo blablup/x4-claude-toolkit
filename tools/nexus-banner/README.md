@@ -40,3 +40,18 @@ python3 tools/nexus-banner/make_banner.py --title "Prospect Missions" \
 
 The title font auto-fits to the left text column, so long titles shrink instead of overflowing.
 Fonts are auto-discovered (Liberation/DejaVu/Arial across OSes) with a PIL fallback.
+
+## prep_images.py — gallery screenshots
+
+Normalize user-supplied screenshots into a Nexus-ready, numbered gallery folder (web-sized,
+metadata-stripped, deterministic order). Used by the `x4-nexus-publish` skill.
+
+```bash
+uv run --with pillow python tools/nexus-banner/prep_images.py \
+    shots/ extra.png "more/*.png" \
+    --out dist/images --prefix gallery_ --max-width 1920 --max-height 1080 [--format jpg]
+```
+
+Inputs may be files, directories (sorted by name), or globs — **the order you pass = the gallery
+order**. Oversized images are downscaled (aspect preserved); RGBA is flattened for JPEG; output is
+`gallery_01.*`, `gallery_02.*`, … Upload them to Nexus in that order.
